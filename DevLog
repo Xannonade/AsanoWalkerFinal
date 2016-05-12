@@ -1,0 +1,12 @@
+Tuesday May 10
+-added Shapes (collections of Squares)
+-added Squares
+-added Locations (row and column objects)
+-added Orientations for all blocks
+
+Wednesday May 11
+
+
+Thursday May 12
+-made progress on removing full rows
+-started to fix the grid to make rows and cols
