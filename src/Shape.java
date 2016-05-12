@@ -18,13 +18,13 @@ public class Shape {
 		Location[] list = orientation.getCurrent();
 		for(int i = 0; i < list.length; i++) {
 			Location l = list[i];
-			arr[i] = new Square(new Location(loc.getX() + (l.getX() * Square.SQUARE_WIDTH), loc.getY() + (l.getY() * Square.SQUARE_HEIGHT)), Main.squareImages.get(color));
+			arr[i] = new Square(new Location(loc.getCol() + (l.getCol() * Square.SQUARE_WIDTH), loc.getRow() + (l.getRow() * Square.SQUARE_HEIGHT)), Main.squareImages.get(color));
 		}
 		return arr;
 	}
 	
-	public void moveTo(int x, int y) {
-		loc = new Location(x, y);
+	public void moveTo(int r, int c) {
+		loc = new Location(r, c);
 	}
 	
 	public void moveTo(Location l) {
@@ -35,10 +35,10 @@ public class Shape {
 	public void move(int direction) {
 		int w = Square.SQUARE_WIDTH;
 		int h = Square.SQUARE_HEIGHT;
-		if(direction == 0) loc = new Location(loc.getX() + w, loc.getY());
-		if(direction == 1) loc = new Location(loc.getX(), loc.getY() + h);
-		if(direction == 2) loc = new Location(loc.getX() - w, loc.getY());
-		if(direction == 3) loc = new Location(loc.getX(), loc.getY() - h);
+		if(direction == 0) loc = new Location(loc.getCol() + w, loc.getRow());
+		if(direction == 1) loc = new Location(loc.getCol(), loc.getRow() + h);
+		if(direction == 2) loc = new Location(loc.getCol() - w, loc.getRow());
+		if(direction == 3) loc = new Location(loc.getCol(), loc.getRow() - h);
 	}
 	
 	public Location getLoc() {
@@ -46,15 +46,15 @@ public class Shape {
 	}
 	
 	public Location getGridSpot() {
-		int x = (loc.getX() - Main.LEFT_EDGE) / Square.SQUARE_WIDTH;
-		int y = (loc.getY() - Main.TOP)/ Square.SQUARE_HEIGHT;
+		int x = (loc.getCol() - Main.LEFT_EDGE) / Square.SQUARE_WIDTH;
+		int y = (loc.getRow() - Main.TOP)/ Square.SQUARE_HEIGHT;
 		return new Location(x, y);
 	}
 	
 	public int getHeight() {
 		int h = 1;
 		for(Location l : orientation.getCurrent()) {
-			h = Math.max(h, l.getY());
+			h = Math.max(h, l.getRow());
 		}
 		return h;
 	}
@@ -67,7 +67,7 @@ public class Shape {
 		Square[] squares = getBlocks();
 		Square max = squares[0];
 		for(Square s : squares) {
-			if(s.getLoc().getX() > max.getLoc().getX()) max = s;
+			if(s.getLoc().getCol() > max.getLoc().getCol()) max = s;
 		}
 		return max;
 	}
@@ -76,7 +76,7 @@ public class Shape {
 		Square[] squares = getBlocks();
 		Square min = squares[0];
 		for(Square s : squares) {
-			if(s.getLoc().getX() < min.getLoc().getX()) min = s;
+			if(s.getLoc().getCol() < min.getLoc().getCol()) min = s;
 		}
 		return min;
 	}
@@ -85,7 +85,7 @@ public class Shape {
 		Square[] squares = getBlocks();
 		Square max = squares[0];
 		for(Square s : squares) {
-			if(s.getLoc().getY() > max.getLoc().getY()) max = s;
+			if(s.getLoc().getRow() > max.getLoc().getRow()) max = s;
 		}
 		return max;
 	}
@@ -94,7 +94,7 @@ public class Shape {
 		Square[] squares = getBlocks();
 		Square min = squares[0];
 		for(Square s : squares) {
-			if(s.getLoc().getY() < min.getLoc().getY()) min = s;
+			if(s.getLoc().getRow() < min.getLoc().getRow()) min = s;
 		}
 		return min;
 	}

@@ -6,7 +6,7 @@ public class Square {
 	static int SQUARE_HEIGHT = 30;
 	
 	private Location loc;
-	private PImage image;
+	private PImage image = null;
 	private boolean falling;
 	
 	public Square(Location l) {
@@ -29,10 +29,10 @@ public class Square {
 	public void move(int direction) {
 		int w = Square.SQUARE_WIDTH;
 		int h = Square.SQUARE_HEIGHT;
-		if (direction == 0) loc = new Location(loc.getX() + w, loc.getY());
-		if (direction == 1) loc = new Location(loc.getX(), loc.getY() + h);
-		if (direction == 2) loc = new Location(loc.getX() - w, loc.getY());
-		if (direction == 3) loc = new Location(loc.getX(), loc.getY() - h);
+		if (direction == 0) loc = new Location(loc.getCol() + w, loc.getRow());
+		if (direction == 1) loc = new Location(loc.getCol(), loc.getRow() + h);
+		if (direction == 2) loc = new Location(loc.getCol() - w, loc.getRow());
+		if (direction == 3) loc = new Location(loc.getCol(), loc.getRow() - h);
 	}
 
 	public boolean isFalling() {
@@ -44,8 +44,8 @@ public class Square {
 	}
 	
 	public Location getGridSpot() {
-		int x = (loc.getX() - Main.LEFT_EDGE) / SQUARE_WIDTH;
-		int y = (loc.getY() - Main.TOP)/ SQUARE_HEIGHT;
+		int x = (loc.getCol() - Main.LEFT_EDGE) / SQUARE_WIDTH;
+		int y = (loc.getRow() - Main.TOP)/ SQUARE_HEIGHT;
 		return new Location(x, y);
 	}
 	

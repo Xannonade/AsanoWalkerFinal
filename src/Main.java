@@ -165,25 +165,30 @@ public class Main extends PApplet {
 
 	private void checkForFullRows() {
 		boolean isFull = true;
-		for(int i = 0; i < grid.length; i++) {
+		for(int r = 0; r < grid.length; r++) {
 			isFull = true;
-			for(int j = 0; j < grid[i].length; j++) {
-				if((grid[i][j] instanceof EmptySquare)) System.out.println(grid[i][j].getGridSpot());
-				if(grid[i][j].isFalling() == true || grid[i][j] instanceof EmptySquare){
-					if(i == grid.length - 1) System.out.println(j);
+			for(int c = 0; c < grid[0].length; c++) {
+				//if((grid[i][j] instanceof EmptySquare)) System.out.println(grid[i][j].getGridSpot());
+				System.out.println("[" + r + ", " + c + "]");
+				if(isFull == true && (grid[r][c].isFalling() == true || grid[r][c].getImage() == null)){
+					System.out.println(c);
 					isFull = false;
-					break;
 				}
 			}
-			if(isFull) removeRow(i);
+			if(isFull) removeRow(r);
 		}
 	}
 
 	private void removeRow(int r) {
-		for (int row = 0; row < r; row++) {
-			for (int col = 0; col < grid[row].length; col++) {
+		for(int col = 0; col < grid.length; col++) {
+			grid[r][col] = new EmptySquare(new Location(r, col));
+		}
+		System.out.println(grid.length);
+		for (int row = 0; row < grid.length; row++) {
+			for (int col = 0; col < grid[0].length; col++) {
+				System.out.println(row + ", " + col);
 				Square s = grid[row][col];
-				if(s.isFalling() == false && !(s instanceof EmptySquare)) s.move(1);
+				
 			}
 		}
 		score += 100;
@@ -202,13 +207,13 @@ public class Main extends PApplet {
 	
 	//direction of -1 = left, 1 = right
 	public boolean moveShape(int direction) {
-		if(direction == -1 && currentShape.getFurthestLeft().getGridSpot().getX() > 0) {
+		if(direction == -1 && currentShape.getFurthestLeft().getGridSpot().getCol() > 0) {
 			if(isColliding(2) == false){
 				currentShape.move(2);
 				return true;
 			}
 		}
-		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getX() < grid.length - 1) {
+		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getCol() < grid.length - 1) {
 			if(isColliding(0) == false) {
 				currentShape.move(0);
 				return true;
@@ -221,33 +226,33 @@ public class Main extends PApplet {
 		ArrayList<Square> arr = new ArrayList<Square>();
 		currentShape.rotate(direction);
 		Square s = currentShape.getFurthestRight();
-		while (s.getLoc().getX() >= RIGHT_EDGE) {
+		while (s.getLoc().getCol() >= RIGHT_EDGE) {
 			currentShape.move(2);
 			arr.add(s);
 			s = currentShape.getFurthestRight();
 		}
-		//System.out.println("X: " + s.getLoc().getX() + " < " + (RIGHT_EDGE - LEFT_EDGE));
+		//System.out.println("X: " + s.getLoc().getCol() + " < " + (RIGHT_EDGE - LEFT_EDGE));
 		s = currentShape.getFurthestLeft();
-		while (s.getLoc().getX() <= LEFT_EDGE) {
+		while (s.getLoc().getCol() <= LEFT_EDGE) {
 			currentShape.move(0);
 			arr.add(s);
 			s = currentShape.getFurthestLeft();
 		}
-		//System.out.println("X: " + s.getLoc().getX() + " > " + LEFT_EDGE);
+		//System.out.println("X: " + s.getLoc().getCol() + " > " + LEFT_EDGE);
 		s = currentShape.getLowest();
-		while (s.getLoc().getX() >= BOTTOM) {
+		while (s.getLoc().getCol() >= BOTTOM) {
 			currentShape.move(3);
 			arr.add(s);
 			s = currentShape.getLowest();
 		}
-		//System.out.println("Y: " + s.getLoc().getY() + " < " + (BOTTOM - TOP));
+		//System.out.println("Y: " + s.getLoc().getRow() + " < " + (BOTTOM - TOP));
 		s = currentShape.getHighest();
-		while (s.getLoc().getY() <= TOP) {
+		while (s.getLoc().getRow() <= TOP) {
 			currentShape.move(1);
 			arr.add(s);
 			s = currentShape.getHighest();
 		}
-		//System.out.println("Y: " + s.getLoc().getY() + " > " + TOP);
+		//System.out.println("Y: " + s.getLoc().getRow() + " > " + TOP);
 		return arr;
 	}
 
@@ -255,7 +260,7 @@ public class Main extends PApplet {
 		for (Square s : squares) {
 			Location loc = s.getLoc();
 			Location l = s.getGridSpot();
-			grid[l.getX()][l.getY()] = new Square(loc, s.getImage(), false);
+			grid[l.getRow()][l.getCol()] = new Square(loc, s.getImage(), false);
 		}
 	}
 
@@ -263,11 +268,11 @@ public class Main extends PApplet {
 		Square[] newSquares = currentShape.getBlocks();
 		for (Square s : oldSquares) {
 			Location loc = s.getLoc();Location l = s.getGridSpot();
-			grid[l.getX()][l.getY()] = new EmptySquare(loc);
+			grid[l.getRow()][l.getCol()] = new EmptySquare(loc);
 		}
 		for (Square s : newSquares) {
 			Location l = s.getGridSpot();
-			grid[l.getX()][l.getY()] = s;
+			grid[l.getRow()][l.getCol()] = s;
 		}
 	}
 	
@@ -289,8 +294,8 @@ public class Main extends PApplet {
 
 	private boolean isInside(Square s) {
 		Location loc = s.getLoc();
-		if(loc.getX() >=  RIGHT_EDGE || loc.getX() <= LEFT_EDGE) return false;
-		if(loc.getY() <=  TOP || loc.getY() >= BOTTOM) return false;
+		if(loc.getCol() >=  RIGHT_EDGE || loc.getCol() <= LEFT_EDGE) return false;
+		if(loc.getRow() <=  TOP || loc.getRow() >= BOTTOM) return false;
 		System.out.println(loc);
 		return false;
 	}
@@ -305,10 +310,10 @@ public class Main extends PApplet {
 		if(direction == 3) dy = -1;
 		for (Square s : arr) {
 			Location l = s.getGridSpot();
-			//System.out.println(s.getGridSpot() + " of " + "[" + (l.getX() + dx) + ", " + (l.getY() + dy) + "]");
-			if (l.getX() + dx >= grid.length || l.getX() + dx < 0) return true;
-			if (l.getY() + dy >= grid[0].length || l.getY() + dy < 0) return true;
-			Square adjacent = grid[l.getX() + dx][l.getY() + dy];
+			//System.out.println(s.getGridSpot() + " of " + "[" + (l.getRow() + dx) + ", " + (l.getCol() + dy) + "]");
+			if (l.getRow() + dx >= grid.length || l.getRow() + dx < 0) return true;
+			if (l.getCol() + dy >= grid[0].length || l.getCol() + dy < 0) return true;
+			Square adjacent = grid[l.getRow() + dx][l.getCol() + dy];
 			if (!(adjacent instanceof EmptySquare) && adjacent.isFalling() == false)
 				return true;
 		}
@@ -320,14 +325,14 @@ public class Main extends PApplet {
 		for(Square a : newArr) {
 			boolean isInBoth = false;
 			for(Square b : oldArr) {
-				if(a.getLoc().getX() == b.getLoc().getX() && a.getLoc().getY() == b.getLoc().getY()) isInBoth = true;
+				if(a.getLoc().getRow() == b.getLoc().getRow() && a.getLoc().getCol() == b.getLoc().getCol()) isInBoth = true;
 			}
 			if(isInBoth == false) potentials.add(a);
 		}
 		if(potentials.isEmpty()) return true;
 		for(Square s : potentials) {
 			Location l = s.getGridSpot();
-			if(!(grid[l.getX()][l.getY()] instanceof EmptySquare)) {
+			if(!(grid[l.getRow()][l.getCol()] instanceof EmptySquare)) {
 				//System.out.println("false");
 				return false;
 			}
@@ -339,6 +344,7 @@ public class Main extends PApplet {
 		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[r].length; c++) {
 				Square s = grid[r][c];
+				if(!(s instanceof EmptySquare)) System.out.println(r + ", " + c);
 				display(s);
 			}
 		}
@@ -346,7 +352,7 @@ public class Main extends PApplet {
 
 	public boolean display(Square s) {
 		if (!(s instanceof EmptySquare)) {
-			image(s.getImage(), s.getLoc().getX(), s.getLoc().getY());
+			image(s.getImage(), s.getLoc().getCol(), s.getLoc().getRow());
 			return true;
 		}
 		return false;

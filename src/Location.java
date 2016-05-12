@@ -9,11 +9,11 @@ public class Location {
 		y = yloc;
 	}
 	
-	public int getX() {
-		return x;
+	public int getRow() {
+		return y;
 	}
-	
-	public int getY() {
+
+	public int getCol() {
 		return y;
 	}
 	
