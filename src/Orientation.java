@@ -11,7 +11,7 @@ public class Orientation {
 	// list of locations for squares in a 'T' shape
 	private static Location[][] TList = {
 			{ new Location(0, 0), new Location(1, 0), new Location(1, 1), new Location(2, 0) },
-			{ new Location(0, 1), new Location(1, 0), new Location(1, 1), new Location(1, 1) },
+			{ new Location(0, 1), new Location(1, 0), new Location(1, 1), new Location(1, 2) },
 			{ new Location(0, 1), new Location(1, 0), new Location(1, 1), new Location(2, 1) },
 			{ new Location(0, 0), new Location(0, 1), new Location(0, 2), new Location(1, 1) } };
 
@@ -60,11 +60,16 @@ public class Orientation {
 	}
 
 	public static int getHeight(int type) {
-		if(type == TSHAPE) return 2;
-		if(type == SQUARESHAPE) return 2;
-		if(type == LINESHAPE) return 3;
-		if(type == LEFTSHAPE) return 3;
+		if(type == TSHAPE || type == SQUARESHAPE) return 2;
+		if(type == LINESHAPE || type == LEFTSHAPE) return 3;
 		if(type == RIGHTSHAPE) return 4;
+		return -1;
+	}
+	
+	public static int getWidth(int type) {
+		if(type == LINESHAPE) return 1;
+		if(type == LEFTSHAPE || type == RIGHTSHAPE || type == SQUARESHAPE) return 2;
+		if(type == TSHAPE) return 3;
 		return -1;
 	}
 }
