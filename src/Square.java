@@ -26,6 +26,15 @@ public class Square {
 		falling = b;
 	}
 	
+	public void move(int direction) {
+		int w = Square.SQUARE_WIDTH;
+		int h = Square.SQUARE_HEIGHT;
+		if (direction == 0) loc = new Location(loc.getX() + w, loc.getY());
+		if (direction == 1) loc = new Location(loc.getX(), loc.getY() + h);
+		if (direction == 2) loc = new Location(loc.getX() - w, loc.getY());
+		if (direction == 3) loc = new Location(loc.getX(), loc.getY() - h);
+	}
+
 	public boolean isFalling() {
 		return falling;
 	}

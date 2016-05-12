@@ -25,6 +25,8 @@ public class Main extends PApplet {
 	Square[][] grid = new Square[10][24];
 	static ArrayList<PImage> squareImages = new ArrayList<PImage>();
 	static AudioClip song;
+	boolean fastMoving = false;
+	int score = 0;
 
 	static int WIDTH = 600;
 	static int HEIGHT = 1000;
@@ -58,7 +60,7 @@ public class Main extends PApplet {
 		}
 		try {
 			song = Applet.newAudioClip(new URL("file:" + "Assets/TetrisSong.mp3"));
-			song.play();
+			song.loop();
 			System.out.println(song.toString());
 			System.out.println("Loaded the song");
 		} catch (MalformedURLException e) {
@@ -144,23 +146,56 @@ public class Main extends PApplet {
 
 	public void playing() {
 		background(70, 170, 70);
+		text("Score: " + score, RIGHT_EDGE - 50, BOTTOM - 50);
 		rect(LEFT_EDGE, TOP, RIGHT_EDGE - LEFT_EDGE, BOTTOM - TOP - 75);
 		frameCount++;
 		updateShape();
 		updateImages();
-
-		if (frameCount % 5 == 0) {
+		
+		
+		if(frameCount % 2 == 0) {
+			if(fastMoving == true) moveShapeDown();
+			checkForFullRows();
+		}
+		
+		if (frameCount % 6 == 0 && fastMoving == false) {
 			moveShapeDown();
 		}
 	}
 
+	private void checkForFullRows() {
+		boolean isFull = true;
+		for(int i = 0; i < grid.length; i++) {
+			isFull = true;
+			for(int j = 0; j < grid[i].length; j++) {
+				if((grid[i][j] instanceof EmptySquare)) System.out.println(grid[i][j].getGridSpot());
+				if(grid[i][j].isFalling() == true || grid[i][j] instanceof EmptySquare){
+					if(i == grid.length - 1) System.out.println(j);
+					isFull = false;
+					break;
+				}
+			}
+			if(isFull) removeRow(i);
+		}
+	}
+
+	private void removeRow(int r) {
+		for (int row = 0; row < r; row++) {
+			for (int col = 0; col < grid[row].length; col++) {
+				Square s = grid[row][col];
+				if(s.isFalling() == false && !(s instanceof EmptySquare)) s.move(1);
+			}
+		}
+		score += 100;
+	}
+
 	public void moveShapeDown() {
 		Square[] oldSquares = currentShape.getBlocks();
-		if (isColliding()) {
+		if (isColliding(1)) {
 			stopMovingSquares(oldSquares);
 			currentShape = null;
 		} else {
-			currentShape.moveTo(currentShape.getLoc().getX(), currentShape.getLoc().getY() + Square.SQUARE_HEIGHT);
+			currentShape.move(1);
 			updateMovingSquares(oldSquares);
 		}
 	}
@@ -168,12 +203,16 @@ public class Main extends PApplet {
 	//direction of -1 = left, 1 = right
 	public boolean moveShape(int direction) {
 		if(direction == -1 && currentShape.getFurthestLeft().getGridSpot().getX() > 0) {
-			currentShape.move(2);
-			return true;
+			if(isColliding(2) == false){
+				currentShape.move(2);
+				return true;
+			}
 		}
 		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getX() < grid.length - 1) {
-			currentShape.move(0);
-			return true;
+			if(isColliding(0) == false) {
+				currentShape.move(0);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -187,28 +226,28 @@ public class Main extends PApplet {
 			arr.add(s);
 			s = currentShape.getFurthestRight();
 		}
-		System.out.println("X: " + s.getLoc().getX() + " < " + (RIGHT_EDGE - LEFT_EDGE));
+		//System.out.println("X: " + s.getLoc().getX() + " < " + (RIGHT_EDGE - LEFT_EDGE));
 		s = currentShape.getFurthestLeft();
 		while (s.getLoc().getX() <= LEFT_EDGE) {
 			currentShape.move(0);
 			arr.add(s);
 			s = currentShape.getFurthestLeft();
 		}
-		System.out.println("X: " + s.getLoc().getX() + " > " + LEFT_EDGE);
+		//System.out.println("X: " + s.getLoc().getX() + " > " + LEFT_EDGE);
 		s = currentShape.getLowest();
 		while (s.getLoc().getX() >= BOTTOM) {
 			currentShape.move(3);
 			arr.add(s);
 			s = currentShape.getLowest();
 		}
-		System.out.println("Y: " + s.getLoc().getY() + " < " + (BOTTOM - TOP));
+		//System.out.println("Y: " + s.getLoc().getY() + " < " + (BOTTOM - TOP));
 		s = currentShape.getHighest();
 		while (s.getLoc().getY() <= TOP) {
 			currentShape.move(1);
 			arr.add(s);
 			s = currentShape.getHighest();
 		}
-		System.out.println("Y: " + s.getLoc().getY() + " > " + TOP);
+		//System.out.println("Y: " + s.getLoc().getY() + " > " + TOP);
 		return arr;
 	}
 
@@ -216,8 +255,7 @@ public class Main extends PApplet {
 		for (Square s : squares) {
 			Location loc = s.getLoc();
 			Location l = s.getGridSpot();
-			grid[l.getX()][l.getY()] = new Square(loc, s.getImage(),
-					false);
+			grid[l.getX()][l.getY()] = new Square(loc, s.getImage(), false);
 		}
 	}
 
@@ -244,7 +282,7 @@ public class Main extends PApplet {
 			} else {
 				a[i] = oldSquares[i - arr.size()];
 			}
-			System.out.println(a[i].getLoc());
+			//System.out.println(a[i].getLoc());
 		}
 		updateMovingSquares(a);
 	}
@@ -257,20 +295,44 @@ public class Main extends PApplet {
 		return false;
 	}
 
-	public boolean isColliding() {
+	public boolean isColliding(int direction) {
 		Square[] arr = currentShape.getBlocks();
+		int dx = 0;
+		int dy = 0;
+		if(direction == 0) dx = 1;
+		if(direction == 1) dy = 1;
+		if(direction == 2) dx = -1;
+		if(direction == 3) dy = -1;
 		for (Square s : arr) {
-			//System.out.println(s.getGridSpot().getX() + " of " + grid[0].length);
 			Location l = s.getGridSpot();
-			if (l.getY() >= grid[0].length - 1) {
-				System.out.println(s.getLoc().getY());
-				return true;
-			}
-			Square below = grid[l.getX()][l.getY() + 1];
-			if (!(below instanceof EmptySquare) && below.isFalling() == false)
+			//System.out.println(s.getGridSpot() + " of " + "[" + (l.getX() + dx) + ", " + (l.getY() + dy) + "]");
+			if (l.getX() + dx >= grid.length || l.getX() + dx < 0) return true;
+			if (l.getY() + dy >= grid[0].length || l.getY() + dy < 0) return true;
+			Square adjacent = grid[l.getX() + dx][l.getY() + dy];
+			if (!(adjacent instanceof EmptySquare) && adjacent.isFalling() == false)
 				return true;
 		}
 		return false;
+	}
+	
+	public boolean canRotate(Square[] oldArr, Square[] newArr) {
+		ArrayList<Square> potentials = new ArrayList<Square>();
+		for(Square a : newArr) {
+			boolean isInBoth = false;
+			for(Square b : oldArr) {
+				if(a.getLoc().getX() == b.getLoc().getX() && a.getLoc().getY() == b.getLoc().getY()) isInBoth = true;
+			}
+			if(isInBoth == false) potentials.add(a);
+		}
+		if(potentials.isEmpty()) return true;
+		for(Square s : potentials) {
+			Location l = s.getGridSpot();
+			if(!(grid[l.getX()][l.getY()] instanceof EmptySquare)) {
+				//System.out.println("false");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void updateImages() {
@@ -292,7 +354,7 @@ public class Main extends PApplet {
 
 	public void updateShape() {
 		if (currentShape == null) {
-			int type = (int) (Math.random() * 5);
+			int type = (int) (Math.random() * 7);
 			int squaresHigh = Orientation.getHeight(type);
 			int squaresWide = Orientation.getWidth(type);
 			currentShape = new Shape(new Location(WIDTH / 2 - (Square.SQUARE_WIDTH * squaresWide),
@@ -349,12 +411,20 @@ public class Main extends PApplet {
 			}
 		}
 		if (k == KeyAction.UP) {
-			Square[] a = currentShape.getBlocks();
-			ArrayList<Square> arr = rotateShape(1);
-			updateMovingSquares(arr, a);
+			Square[] before = currentShape.getBlocks();
+			currentShape.rotate(1);
+			Square[] after = currentShape.getBlocks();
+			currentShape.rotate(-1);
+			if(canRotate(before, after)) {
+				ArrayList<Square> arr = rotateShape(1);
+				updateMovingSquares(arr, before);
+			}
 		}
 		if (k == KeyAction.DOWN) {
-
+			fastMoving = true;
+		}
+		if(k == KeyAction.NOTDOWN) {
+			fastMoving = false;
 		}
 		if (k == KeyAction.RIGHT) {
 			Square[] a = currentShape.getBlocks();

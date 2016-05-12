@@ -7,6 +7,8 @@ public class Orientation {
 	static final int LINESHAPE = 2;
 	static final int LEFTSHAPE = 3;
 	static final int RIGHTSHAPE = 4;
+	static final int ZSHAPE = 5;
+	static final int SSHAPE = 6;
 	
 	// list of locations for squares in a 'T' shape
 	private static Location[][] TList = {
@@ -16,7 +18,7 @@ public class Orientation {
 			{ new Location(0, 0), new Location(0, 1), new Location(0, 2), new Location(1, 1) } };
 
 	// list of locations for squares in a square shape
-	private static Location[][] SList = { { new Location(0, 0), new Location(0, 1), new Location(1, 0), new Location(1, 1) } };
+	private static Location[][] SquareList = { { new Location(0, 0), new Location(0, 1), new Location(1, 0), new Location(1, 1) } };
 
 	// list of locations for squares in a line shape
 	private static Location[][] LineList = {
@@ -37,15 +39,25 @@ public class Orientation {
 			{ new Location(0, 0), new Location(1, 0), new Location(1, 1), new Location(1, 2) },
 			{ new Location(0, 1), new Location(1, 1), new Location(2, 0), new Location(2, 1) } };
 	
+	private static Location[][] ZList = {
+			{ new Location(0, 0), new Location(1, 0), new Location(1, 1), new Location(2, 1) },
+			{ new Location(0, 1), new Location(0, 2), new Location(1, 0), new Location(1, 1) }};
+	
+	private static Location[][] SList = {
+			{ new Location(0, 1), new Location(1, 0), new Location(1, 1), new Location(2, 0) },
+			{ new Location(0, 0), new Location(0, 1), new Location(1, 1), new Location(1, 2) }};
+	
 	Location[][] list;
 	int index;
 	
 	public Orientation(int type){
 		if(type == TSHAPE) this.list = TList;
-		if(type == SQUARESHAPE) this.list = SList;
+		if(type == SQUARESHAPE) this.list = SquareList;
 		if(type == LINESHAPE) this.list = LineList;
 		if(type == LEFTSHAPE) this.list = LList;
 		if(type == RIGHTSHAPE) this.list = RList;
+		if(type == ZSHAPE) this.list = ZList;
+		if(type == SSHAPE) this.list = SList;
 		index = 0;
 	};
 	
@@ -55,7 +67,7 @@ public class Orientation {
 	
 	//direction of -1 = rotating left, direction of 1 = rotating right
 	public Location[] rotate(int direction) {
-		index = (index + direction) % list.length;
+		index = ((index + direction) + list.length)% list.length;
 		return list[index];
 	}
 
