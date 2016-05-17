@@ -54,7 +54,7 @@ public class Main extends PApplet {
 			}
 		}
 		try {
-			song = Applet.newAudioClip(new URL("file:" + "Assets/TetrisSong.aif"));
+			song = Applet.newAudioClip(new URL("file:" + "Assets/TetrisSong.wav"));
 			song.loop();
 			System.out.println(song.toString());
 			System.out.println("Loaded the song");
