@@ -18,7 +18,7 @@ public class Shape {
 		Location[] list = orientation.getCurrent();
 		for(int i = 0; i < list.length; i++) {
 			Location l = list[i];
-			arr[i] = new Square(new Location(loc.getCol() + (l.getCol() * Square.SQUARE_WIDTH), loc.getRow() + (l.getRow() * Square.SQUARE_HEIGHT)), Main.squareImages.get(color));
+			arr[i] = new Square(new Location(loc.getRow() + (l.getRow() * Square.SQUARE_HEIGHT), loc.getCol() + (l.getCol() * Square.SQUARE_WIDTH)), Main.squareImages.get(color));
 		}
 		return arr;
 	}
@@ -35,10 +35,10 @@ public class Shape {
 	public void move(int direction) {
 		int w = Square.SQUARE_WIDTH;
 		int h = Square.SQUARE_HEIGHT;
-		if(direction == 0) loc = new Location(loc.getCol() + w, loc.getRow());
-		if(direction == 1) loc = new Location(loc.getCol(), loc.getRow() + h);
-		if(direction == 2) loc = new Location(loc.getCol() - w, loc.getRow());
-		if(direction == 3) loc = new Location(loc.getCol(), loc.getRow() - h);
+		if(direction == 0) loc = new Location(loc.getRow(), loc.getCol() + w);
+		if(direction == 1) loc = new Location(loc.getRow() + h, loc.getCol());
+		if(direction == 2) loc = new Location(loc.getRow(), loc.getCol() - w);
+		if(direction == 3) loc = new Location(loc.getRow() - h, loc.getCol());
 	}
 	
 	public Location getLoc() {
@@ -46,9 +46,9 @@ public class Shape {
 	}
 	
 	public Location getGridSpot() {
-		int x = (loc.getCol() - Main.LEFT_EDGE) / Square.SQUARE_WIDTH;
-		int y = (loc.getRow() - Main.TOP)/ Square.SQUARE_HEIGHT;
-		return new Location(x, y);
+		int r = (loc.getRow() - Main.TOP) / Square.SQUARE_HEIGHT;
+		int c = (loc.getCol() - Main.LEFT_EDGE) / Square.SQUARE_WIDTH;
+		return new Location(r, c);
 	}
 	
 	public int getHeight() {

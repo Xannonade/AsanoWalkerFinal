@@ -5,7 +5,10 @@ Tuesday May 10
 -added Orientations for all blocks
 
 Wednesday May 11
-
+-put objects in the grid
+-added rotation with the up arrow
+-added translation with the left and right arrows
+-added fast falling with the down arrow
 
 Thursday May 12
 -made progress on removing full rows

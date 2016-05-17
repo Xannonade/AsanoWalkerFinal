@@ -1,23 +1,23 @@
 
 public class Location {
 	
-	private int x;
-	private int y;
+	private int row;
+	private int col;
 	
-	public Location(int xloc, int yloc) {
-		x = xloc;
-		y = yloc;
+	public Location(int r, int c) {
+		row = r;
+		col = c;
 	}
 	
 	public int getRow() {
-		return y;
+		return row;
 	}
 
 	public int getCol() {
-		return y;
+		return col;
 	}
 	
 	public String toString() {
-		return("[" + x + ", " + y + "]");
+		return("[" + row + ", " + col + "]");
 	}
 }

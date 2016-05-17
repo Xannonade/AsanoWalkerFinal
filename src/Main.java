@@ -4,11 +4,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.event.KeyEvent;
@@ -22,9 +17,9 @@ public class Main extends PApplet {
 	GameState gs = GameState.OPENING;
 	int frameCount;
 	Shape currentShape;
-	Square[][] grid = new Square[10][24];
+	Square[][] grid = new Square[24][10];
 	static ArrayList<PImage> squareImages = new ArrayList<PImage>();
-	static AudioClip song;
+	static AudioClip song = null;
 	boolean fastMoving = false;
 	int score = 0;
 
@@ -59,7 +54,7 @@ public class Main extends PApplet {
 			}
 		}
 		try {
-			song = Applet.newAudioClip(new URL("file:" + "Assets/TetrisSong.mp3"));
+			song = Applet.newAudioClip(new URL("file:" + "Assets/TetrisSong.aif"));
 			song.loop();
 			System.out.println(song.toString());
 			System.out.println("Loaded the song");
@@ -147,11 +142,12 @@ public class Main extends PApplet {
 	public void playing() {
 		background(70, 170, 70);
 		text("Score: " + score, RIGHT_EDGE - 50, BOTTOM - 50);
-		rect(LEFT_EDGE, TOP, RIGHT_EDGE - LEFT_EDGE, BOTTOM - TOP - 75);
+		rect(LEFT_EDGE, TOP, RIGHT_EDGE - LEFT_EDGE, BOTTOM - TOP - 80);
 		frameCount++;
 		updateShape();
 		updateImages();
 		
+		//System.out.println(currentShape.getGridSpot());
 		
 		if(frameCount % 2 == 0) {
 			if(fastMoving == true) moveShapeDown();
@@ -169,9 +165,9 @@ public class Main extends PApplet {
 			isFull = true;
 			for(int c = 0; c < grid[0].length; c++) {
 				//if((grid[i][j] instanceof EmptySquare)) System.out.println(grid[i][j].getGridSpot());
-				System.out.println("[" + r + ", " + c + "]");
+				//System.out.println("[" + r + ", " + c + "]");
 				if(isFull == true && (grid[r][c].isFalling() == true || grid[r][c].getImage() == null)){
-					System.out.println(c);
+					// System.out.println(c);
 					isFull = false;
 				}
 			}
@@ -180,13 +176,12 @@ public class Main extends PApplet {
 	}
 
 	private void removeRow(int r) {
-		for(int col = 0; col < grid.length; col++) {
+		for(int col = 0; col < grid[0].length; col++) {
 			grid[r][col] = new EmptySquare(new Location(r, col));
 		}
-		System.out.println(grid.length);
 		for (int row = 0; row < grid.length; row++) {
 			for (int col = 0; col < grid[0].length; col++) {
-				System.out.println(row + ", " + col);
+				//System.out.println(row + ", " + col);
 				Square s = grid[row][col];
 				
 			}
@@ -196,7 +191,7 @@ public class Main extends PApplet {
 
 	public void moveShapeDown() {
 		Square[] oldSquares = currentShape.getBlocks();
-		if (isColliding(1)) {
+		if (isColliding(1) == true) {
 			stopMovingSquares(oldSquares);
 			currentShape = null;
 		} else {
@@ -213,7 +208,7 @@ public class Main extends PApplet {
 				return true;
 			}
 		}
-		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getCol() < grid.length - 1) {
+		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getCol() < grid[0].length - 1) {
 			if(isColliding(0) == false) {
 				currentShape.move(0);
 				return true;
@@ -240,7 +235,7 @@ public class Main extends PApplet {
 		}
 		//System.out.println("X: " + s.getLoc().getCol() + " > " + LEFT_EDGE);
 		s = currentShape.getLowest();
-		while (s.getLoc().getCol() >= BOTTOM) {
+		while (s.getLoc().getRow() >= BOTTOM) {
 			currentShape.move(3);
 			arr.add(s);
 			s = currentShape.getLowest();
@@ -262,12 +257,13 @@ public class Main extends PApplet {
 			Location l = s.getGridSpot();
 			grid[l.getRow()][l.getCol()] = new Square(loc, s.getImage(), false);
 		}
-	}
+	} 
 
 	public void updateMovingSquares(Square[] oldSquares) {
 		Square[] newSquares = currentShape.getBlocks();
 		for (Square s : oldSquares) {
-			Location loc = s.getLoc();Location l = s.getGridSpot();
+			Location loc = s.getLoc();
+			Location l = s.getGridSpot();
 			grid[l.getRow()][l.getCol()] = new EmptySquare(loc);
 		}
 		for (Square s : newSquares) {
@@ -296,26 +292,28 @@ public class Main extends PApplet {
 		Location loc = s.getLoc();
 		if(loc.getCol() >=  RIGHT_EDGE || loc.getCol() <= LEFT_EDGE) return false;
 		if(loc.getRow() <=  TOP || loc.getRow() >= BOTTOM) return false;
-		System.out.println(loc);
 		return false;
 	}
 
 	public boolean isColliding(int direction) {
 		Square[] arr = currentShape.getBlocks();
-		int dx = 0;
-		int dy = 0;
-		if(direction == 0) dx = 1;
-		if(direction == 1) dy = 1;
-		if(direction == 2) dx = -1;
-		if(direction == 3) dy = -1;
+		int dr = 0;
+		int dc = 0;
+		if(direction == 0) dc = 1;
+		if(direction == 1) dr = 1;
+		if(direction == 2) dc = -1;
+		if(direction == 3) dr = -1;
 		for (Square s : arr) {
 			Location l = s.getGridSpot();
 			//System.out.println(s.getGridSpot() + " of " + "[" + (l.getRow() + dx) + ", " + (l.getCol() + dy) + "]");
-			if (l.getRow() + dx >= grid.length || l.getRow() + dx < 0) return true;
-			if (l.getCol() + dy >= grid[0].length || l.getCol() + dy < 0) return true;
-			Square adjacent = grid[l.getRow() + dx][l.getCol() + dy];
-			if (!(adjacent instanceof EmptySquare) && adjacent.isFalling() == false)
+			if (l.getRow() + dr >= grid.length || l.getRow() + dr < 0) {
 				return true;
+			}
+			if (l.getCol() + dc >= grid[0].length|| l.getCol() + dc < 0) {
+				return true;
+			}
+			Square adjacent = grid[l.getRow() + dr][l.getCol() + dc];
+			if (!(adjacent instanceof EmptySquare) && adjacent.isFalling() == false) return true;
 		}
 		return false;
 	}
@@ -344,7 +342,7 @@ public class Main extends PApplet {
 		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[r].length; c++) {
 				Square s = grid[r][c];
-				if(!(s instanceof EmptySquare)) System.out.println(r + ", " + c);
+				//if(!(s instanceof EmptySquare)) System.out.println(r + ", " + c);
 				display(s);
 			}
 		}
@@ -363,8 +361,7 @@ public class Main extends PApplet {
 			int type = (int) (Math.random() * 7);
 			int squaresHigh = Orientation.getHeight(type);
 			int squaresWide = Orientation.getWidth(type);
-			currentShape = new Shape(new Location(WIDTH / 2 - (Square.SQUARE_WIDTH * squaresWide),
-					(4 * Square.SQUARE_HEIGHT) - Square.SQUARE_HEIGHT * squaresHigh), type);
+			currentShape = new Shape(new Location(TOP + (4 - squaresHigh) * Square.SQUARE_HEIGHT, WIDTH / 2 - (Square.SQUARE_WIDTH * squaresWide)), type);
 			System.out.println("Created a new shape");
 		}
 	}

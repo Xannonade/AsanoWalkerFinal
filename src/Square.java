@@ -29,10 +29,10 @@ public class Square {
 	public void move(int direction) {
 		int w = Square.SQUARE_WIDTH;
 		int h = Square.SQUARE_HEIGHT;
-		if (direction == 0) loc = new Location(loc.getCol() + w, loc.getRow());
-		if (direction == 1) loc = new Location(loc.getCol(), loc.getRow() + h);
-		if (direction == 2) loc = new Location(loc.getCol() - w, loc.getRow());
-		if (direction == 3) loc = new Location(loc.getCol(), loc.getRow() - h);
+		if(direction == 0) loc = new Location(loc.getRow(), loc.getCol() + w);
+		if(direction == 1) loc = new Location(loc.getRow() + h, loc.getCol());
+		if(direction == 2) loc = new Location(loc.getRow(), loc.getCol() - w);
+		if(direction == 3) loc = new Location(loc.getRow() - h, loc.getCol());
 	}
 
 	public boolean isFalling() {
@@ -44,9 +44,9 @@ public class Square {
 	}
 	
 	public Location getGridSpot() {
-		int x = (loc.getCol() - Main.LEFT_EDGE) / SQUARE_WIDTH;
-		int y = (loc.getRow() - Main.TOP)/ SQUARE_HEIGHT;
-		return new Location(x, y);
+		int r = (loc.getRow() - Main.TOP)/ SQUARE_HEIGHT;
+		int c = (loc.getCol() - Main.LEFT_EDGE) / SQUARE_WIDTH;
+		return new Location(r, c);
 	}
 	
 	
