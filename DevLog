@@ -13,3 +13,8 @@ Wednesday May 11
 Thursday May 12
 -made progress on removing full rows
 -started to fix the grid to make rows and cols
+
+Tuesday May 17
+-started methods for dealing with row deletion
+-not finished. currently working on recursive fill method to make chunk
+-made 'Chunk' class

@@ -8,6 +8,7 @@ public class Square {
 	private Location loc;
 	private PImage image = null;
 	private boolean falling;
+	private boolean chunkFlag = false;
 	
 	public Square(Location l) {
 		loc = l;
@@ -49,6 +50,13 @@ public class Square {
 		return new Location(r, c);
 	}
 	
+	public void flag(boolean f) {
+		chunkFlag = f;
+	}
+	
+	public boolean getFlag() {
+		return chunkFlag;
+	}
 	
 	public PImage getImage() {
 		return image;

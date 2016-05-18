@@ -17,6 +17,13 @@ public class Location {
 		return col;
 	}
 	
+	public boolean equals(Location other) {
+		if (row == other.getRow())
+			if (col == other.getCol())
+				return true;
+		return false;
+	}
+	
 	public String toString() {
 		return("[" + row + ", " + col + "]");
 	}
