@@ -1,8 +1,7 @@
-import processing.core.PImage;
 
 public class EmptySquare extends Square{
 
-	public EmptySquare(Location l) {
+	public EmptySquare(GridLoc l) {
 		super(l);
 	}
 

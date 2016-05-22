@@ -1,8 +1,8 @@
 
 public class Location {
 	
-	private int row;
-	private int col;
+	protected int row;
+	protected int col;
 	
 	public Location(int r, int c) {
 		row = r;

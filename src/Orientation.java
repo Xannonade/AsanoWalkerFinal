@@ -23,7 +23,9 @@ public class Orientation {
 	// list of locations for squares in a line shape
 	private static Location[][] LineList = {
 			{ new Location(0, 0), new Location(0, 1), new Location(0, 2), new Location(0, 3) },
-			{ new Location(0, 0), new Location(1, 0), new Location(2, 0), new Location(3, 0) } };
+			{ new Location(0, 0), new Location(1, 0), new Location(2, 0), new Location(3, 0) },
+			{ new Location(0, 0), new Location(0, -1), new Location(0, -2), new Location(0, -3) },
+			{ new Location(0, 0), new Location(-1, 0), new Location(-2, 0), new Location(-3, 0) } };
 
 	// list of locations for squares in a left pointing(backwards 'L') shape
 	private static Location[][] LList = {

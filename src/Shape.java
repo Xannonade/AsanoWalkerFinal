@@ -3,11 +3,11 @@ public class Shape {
 	//location of the top left square of the shape
 	//The location is of the top left corner of the square made by the furthest left and highest parts of the shape
 	//Therefore, square at this location may be empty
-	private Location loc;
+	private GridLoc loc;
 	private Orientation orientation;
 	private int color;
 	
-	public Shape(Location l, int type) {
+	public Shape(GridLoc l, int type) {
 		orientation = new Orientation(type);
 		loc = l;
 		color = (int)(Math.random() * 10);
@@ -18,37 +18,29 @@ public class Shape {
 		Location[] list = orientation.getCurrent();
 		for(int i = 0; i < list.length; i++) {
 			Location l = list[i];
-			arr[i] = new Square(new Location(loc.getRow() + (l.getRow() * Square.SQUARE_HEIGHT), loc.getCol() + (l.getCol() * Square.SQUARE_WIDTH)), Main.squareImages.get(color));
+			arr[i] = new Square(new GridLoc(loc.getRow() + l.getRow(), loc.getCol() + l.getCol()), Main.squareImages.get(color));
 		}
 		return arr;
 	}
 	
 	public void moveTo(int r, int c) {
-		loc = new Location(r, c);
+		loc = new GridLoc(r, c);
 	}
 	
-	public void moveTo(Location l) {
+	public void moveTo(GridLoc l) {
 		loc = l;
 	}
 	
 	//0 = right, 1 = down, 2 = left, 3 = up
 	public void move(int direction) {
-		int w = Square.SQUARE_WIDTH;
-		int h = Square.SQUARE_HEIGHT;
-		if(direction == 0) loc = new Location(loc.getRow(), loc.getCol() + w);
-		if(direction == 1) loc = new Location(loc.getRow() + h, loc.getCol());
-		if(direction == 2) loc = new Location(loc.getRow(), loc.getCol() - w);
-		if(direction == 3) loc = new Location(loc.getRow() - h, loc.getCol());
+		if(direction == 0) loc = new GridLoc(loc.getRow(), loc.getCol() + 1);
+		if(direction == 1) loc = new GridLoc(loc.getRow() + 1, loc.getCol());
+		if(direction == 2) loc = new GridLoc(loc.getRow(), loc.getCol() - 1);
+		if(direction == 3) loc = new GridLoc(loc.getRow() - 1, loc.getCol());
 	}
 	
-	public Location getLoc() {
+	public GridLoc getLoc() {
 		return loc;
-	}
-	
-	public Location getGridSpot() {
-		int r = (loc.getRow() - Main.TOP) / Square.SQUARE_HEIGHT;
-		int c = (loc.getCol() - Main.LEFT_EDGE) / Square.SQUARE_WIDTH;
-		return new Location(r, c);
 	}
 	
 	public int getHeight() {

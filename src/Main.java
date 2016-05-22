@@ -22,6 +22,7 @@ public class Main extends PApplet {
 	static AudioClip song = null;
 	boolean fastMoving = false;
 	int score = 0;
+	ArrayList<Chunk> chunkList;
 
 	static int WIDTH = 600;
 	static int HEIGHT = 1000;
@@ -128,7 +129,7 @@ public class Main extends PApplet {
 	public void load() {
 		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[r].length; c++) {
-				grid[r][c] = new EmptySquare(new Location(TOP + r * Square.SQUARE_HEIGHT, LEFT + c * Square.SQUARE_WIDTH));
+				grid[r][c] = new EmptySquare(new GridLoc(r, c));
 			}
 		}
 		song.loop();
@@ -177,7 +178,7 @@ public class Main extends PApplet {
 	private void removeRow(int r) {
 		//empty the completed column
 		for(int col = 0; col < grid[0].length; col++) {
-			grid[r][col] = new EmptySquare(new Location(r, col));
+			grid[r][col] = new EmptySquare(new GridLoc(r, col));
 		}
 		
 		//get score
@@ -196,32 +197,52 @@ public class Main extends PApplet {
 	 * all 'chunks' will fall as individual shapes
 	 */
 	private void moveFloatersDown() {
-		ArrayList<Chunk> chunkList = new ArrayList<Chunk>();
-		for (int r = 0; r < grid.length; r++)
+		chunkList = new ArrayList<Chunk>();
+		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[0].length; c++) {
-				Location l = new Location(r, c);
-				if (!checkIfChunkIsMade(chunkList, l))
-					chunkList.add(createChunk(l));
+				Square s = grid[r][c];
+				GridLoc l = new GridLoc(r, c);
+				if (!(s instanceof EmptySquare) && !s.getFlag())
+					createChunk(l);
 			}
-		//make the chunks fall
-		letChunksFall(chunkList);
-		//loop thru all and set flags to false
+		}
+		// make the chunks fall
+		letChunksFall();
+		// loop thru all and set flags to false
 		resetFlags();
 	}
 	
-	private void letChunksFall(ArrayList<Chunk> chunkList) {
-		for(Chunk currentChunk : chunkList) {
+	private void letChunksFall() {
+		if(chunkList.size() > 0) for(Chunk currentChunk : chunkList) {
 			System.out.println(currentChunk.getSquareList().size());
 			boolean canFall = true;
 			while (canFall == true) {
 				for (Square s : currentChunk.getSquareList()) {
-					Location loc = s.getGridSpot();
-					if (!isInside(new Location(loc.getRow() + 1, loc.getCol())) || grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare) {
+					GridLoc loc = s.getLoc();
+					if (!isInside(new GridLoc(loc.getRow() + 1, loc.getCol()))) {
 						canFall = false;
 						break;
 					}
-					System.out.println(canFall);
-					if (canFall) currentChunk.moveDown();
+					if (!(grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare) && grid[loc.getRow() + 1][loc.getCol()].getFlag() == false) {
+						canFall = false;
+						break;
+					}
+					if (canFall) {
+						Chunk c = currentChunk;
+						currentChunk.moveDown();
+						for (Square a : c.getSquareList()) {
+							boolean isInBoth = false;
+							for (Square b : currentChunk.getSquareList()) {
+								if (a.getLoc().equals(b.getLoc()))
+									isInBoth = true;
+							}
+							if (isInBoth == false) {
+								GridLoc l = a.getLoc();
+								grid[l.getRow()][l.getCol()] = new EmptySquare(l);
+							}
+						}
+					}
+
 				}
 			}
 		}
@@ -235,39 +256,37 @@ public class Main extends PApplet {
 		}
 	}
 
-	/*
-	 * list is the chunks (in the form of Shape) that are already made
-	 * this checks to see if the specific block has already been made into a chunk earlier
-	 */
-	private boolean checkIfChunkIsMade(ArrayList<Chunk> list, Location l) {
-		for (Chunk chunk : list)
-			for (Square square : chunk.getSquareList()){
-				System.out.println("yo");
-				if (square.getLoc().equals(l))
-					return true;
-			}
-		return false;
-	}
-
-	private Chunk createChunk(Location l) {
-		Chunk finalChunk = new Chunk();
+	private Chunk createChunk(GridLoc l) {
+		chunkList.add(new Chunk());
 		//make one chunk recursively
-		recursiveSquareAdd(l, finalChunk);
-		return finalChunk;
+		recursiveSquareAdd(l, chunkList.size() - 1);
+		return chunkList.get(chunkList.size() - 1);
 	}
 
-	private void recursiveSquareAdd(Location l, Chunk finalChunk) {
-		Square s = grid[l.getRow()][l.getCol()];
-		
+	private void recursiveSquareAdd(GridLoc l, int index) {
+		System.out.println(l);
 		//base case
-		if (!isInside(s) || s.getFlag() || s instanceof EmptySquare) return;
+		if (!isInside(l)) {
+			System.out.println("a");
+			return;
+		}
+		Square s = grid[l.getRow()][l.getCol()];
+		if(s instanceof EmptySquare) {
+			System.out.println("c");
+			return;
+		}
+		if(s.getFlag()) {
+			System.out.println("b");
+			return;
+		}
 		
-		finalChunk.add(s);
-		System.out.println(s.getGridSpot());
-		recursiveSquareAdd(new Location(l.getRow() + 1, l.getCol()), finalChunk);
-		recursiveSquareAdd(new Location(l.getRow(), l.getCol() + 1), finalChunk);
-		recursiveSquareAdd(new Location(l.getRow() - 1, l.getCol()), finalChunk);
-		recursiveSquareAdd(new Location(l.getRow(), l.getCol() - 1), finalChunk);
+		s.flag(true);
+		chunkList.get(index).add(s);
+		System.out.println(s.getLoc());
+		recursiveSquareAdd(new GridLoc(l.getRow() + 1, l.getCol()), index);
+		recursiveSquareAdd(new GridLoc(l.getRow(), l.getCol() + 1), index);
+		recursiveSquareAdd(new GridLoc(l.getRow() - 1, l.getCol()), index);
+		recursiveSquareAdd(new GridLoc(l.getRow(), l.getCol() - 1), index);
 	}
 
 	public void moveShapeDown() {
@@ -283,13 +302,13 @@ public class Main extends PApplet {
 	
 	//direction of -1 = left, 1 = right
 	public boolean moveShape(int direction) {
-		if(direction == -1 && currentShape.getFurthestLeft().getGridSpot().getCol() > 0) {
+		if(direction == -1 && currentShape.getFurthestLeft().getLoc().getCol() > 0) {
 			if(isColliding(2) == false){
 				currentShape.move(2);
 				return true;
 			}
 		}
-		if(direction == 1 && currentShape.getFurthestRight().getGridSpot().getCol() < grid[0].length - 1) {
+		if(direction == 1 && currentShape.getFurthestRight().getLoc().getCol() < grid[0].length - 1) {
 			if(isColliding(0) == false) {
 				currentShape.move(0);
 				return true;
@@ -302,54 +321,47 @@ public class Main extends PApplet {
 		ArrayList<Square> arr = new ArrayList<Square>();
 		currentShape.rotate(direction);
 		Square s = currentShape.getFurthestRight();
-		while (s.getLoc().getCol() >= RIGHT_EDGE) {
+		while (s.getLoc().getCol() >= grid[0].length - 1) {
 			currentShape.move(2);
 			arr.add(s);
 			s = currentShape.getFurthestRight();
 		}
-		//System.out.println("X: " + s.getLoc().getCol() + " < " + (RIGHT_EDGE - LEFT_EDGE));
 		s = currentShape.getFurthestLeft();
-		while (s.getLoc().getCol() <= LEFT_EDGE) {
+		while (s.getLoc().getCol() <= 0) {
 			currentShape.move(0);
 			arr.add(s);
 			s = currentShape.getFurthestLeft();
-			System.out.println(s.getLoc().getCol() + " of " + LEFT_EDGE);
 		}
-		//System.out.println("X: " + s.getLoc().getCol() + " > " + LEFT_EDGE);
 		s = currentShape.getLowest();
-		while (s.getLoc().getRow() >= BOTTOM) {
+		while (s.getLoc().getRow() >= grid.length - 1) {
 			currentShape.move(3);
 			arr.add(s);
 			s = currentShape.getLowest();
 		}
-		//System.out.println("Y: " + s.getLoc().getRow() + " < " + (BOTTOM - TOP));
 		s = currentShape.getHighest();
-		while (s.getLoc().getRow() <= TOP) {
+		while (s.getLoc().getRow() <= 0) {
 			currentShape.move(1);
 			arr.add(s);
 			s = currentShape.getHighest();
 		}
-		//System.out.println("Y: " + s.getLoc().getRow() + " > " + TOP);
 		return arr;
 	}
 
 	public void stopMovingSquares(Square[] squares) {
 		for (Square s : squares) {
-			Location loc = s.getLoc();
-			Location l = s.getGridSpot();
-			grid[l.getRow()][l.getCol()] = new Square(loc, s.getImage(), false);
+			GridLoc loc = s.getLoc();
+			grid[loc.getRow()][loc.getCol()] = new Square(loc, s.getImage(), false);
 		}
 	} 
 
 	public void updateMovingSquares(Square[] oldSquares) {
 		Square[] newSquares = currentShape.getBlocks();
 		for (Square s : oldSquares) {
-			Location loc = s.getLoc();
-			Location l = s.getGridSpot();
-			grid[l.getRow()][l.getCol()] = new EmptySquare(loc);
+			GridLoc loc = s.getLoc();
+			grid[loc.getRow()][loc.getCol()] = new EmptySquare(loc);
 		}
 		for (Square s : newSquares) {
-			Location l = s.getGridSpot();
+			GridLoc l = s.getLoc();
 			grid[l.getRow()][l.getCol()] = s;
 		}
 	}
@@ -371,16 +383,30 @@ public class Main extends PApplet {
 	}
 
 	private boolean isInside(Square s) {
-		Location loc = s.getLoc();
-		if(loc.getCol() >=  RIGHT_EDGE || loc.getCol() <= LEFT_EDGE) return false;
-		if(loc.getRow() <=  TOP || loc.getRow() >= BOTTOM) return false;
-		return false;
+		GridLoc loc = s.getLoc();
+		if(loc.getCol() >=  grid[0].length) {
+			System.out.println("A");
+			return false;
+		}
+		if(loc.getCol() <= 0) {
+			System.out.println("B");
+			return false;
+		}
+		if(loc.getRow() <= 0) {
+			System.out.println("C");
+			return false;
+		}
+		if(loc.getRow() >= grid.length) {
+			System.out.println("D");
+			return false;
+		}
+		return true;
 	}
 	
-	private boolean isInside(Location loc) {
-		if(loc.getCol() >  grid[0].length - 1|| loc.getCol() < 0) return false;
+	private boolean isInside(GridLoc loc) {
+		if(loc.getCol() >  grid[0].length - 1 || loc.getCol() < 0) return false;
 		if(loc.getRow() <  0 || loc.getRow() > grid.length - 1) return false;
-		return false;
+		return true;
 	}	
 
 	public boolean isColliding(int direction) {
@@ -392,7 +418,7 @@ public class Main extends PApplet {
 		if(direction == 2) dc = -1;
 		if(direction == 3) dr = -1;
 		for (Square s : arr) {
-			Location l = s.getGridSpot();
+			GridLoc l = s.getLoc();
 			//System.out.println(s.getGridSpot() + " of " + "[" + (l.getRow() + dx) + ", " + (l.getCol() + dy) + "]");
 			if (l.getRow() + dr >= grid.length || l.getRow() + dr < 0) {
 				return true;
@@ -411,13 +437,13 @@ public class Main extends PApplet {
 		for(Square a : newArr) {
 			boolean isInBoth = false;
 			for(Square b : oldArr) {
-				if(a.getLoc().getRow() == b.getLoc().getRow() && a.getLoc().getCol() == b.getLoc().getCol()) isInBoth = true;
+				if(a.getLoc().equals(b.getLoc())) isInBoth = true;
 			}
 			if(isInBoth == false) potentials.add(a);
 		}
 		if(potentials.isEmpty()) return true;
 		for(Square s : potentials) {
-			Location l = s.getGridSpot();
+			GridLoc l = s.getLoc();
 			if(isInside(s) && !(grid[l.getRow()][l.getCol()] instanceof EmptySquare)) {
 				//System.out.println("false");
 				return false;
@@ -438,7 +464,8 @@ public class Main extends PApplet {
 
 	public boolean display(Square s) {
 		if (!(s instanceof EmptySquare)) {
-			image(s.getImage(), s.getLoc().getCol(), s.getLoc().getRow());
+			PixeLoc l = s.getLoc().toPixels();
+			image(s.getImage(), l.getCol(), l.getRow());
 			return true;
 		}
 		return false;
@@ -449,7 +476,7 @@ public class Main extends PApplet {
 			int type = (int) (Math.random() * 7);
 			int squaresHigh = Orientation.getHeight(type);
 			int squaresWide = Orientation.getWidth(type);
-			currentShape = new Shape(new Location(TOP + (4 - squaresHigh) * Square.SQUARE_HEIGHT, WIDTH / 2 - (Square.SQUARE_WIDTH * squaresWide)), type);
+			currentShape = new Shape(new GridLoc(4 - squaresHigh, grid[0].length / 2 - squaresWide), type);
 			System.out.println("Created a new shape");
 		}
 	}
