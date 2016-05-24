@@ -150,12 +150,23 @@ public class Main extends PApplet {
 		//System.out.println(currentShape.getGridSpot());
 		
 		if(frameCount % 2 == 0) {
+			checkIfLost();
 			if(fastMoving == true) moveShapeDown();
 			checkForFullRows();
 		}
 		
 		if (frameCount % 6 == 0 && fastMoving == false) {
 			moveShapeDown();
+		}
+	}
+	
+	public void checkIfLost() {
+		for(int c = 0; c < grid[0].length; c++) {
+			if(!(grid[0][c] instanceof EmptySquare)) {
+				song.stop();
+				gs = GameState.GAMEOVER;
+				break;
+			}
 		}
 	}
 
@@ -225,7 +236,7 @@ public class Main extends PApplet {
 							break inner;
 						}
 						//should be in the same chunk, not just flagged
-						if (!(grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare)  && grid[loc.getRow() + 1][loc.getCol()].getFlag() == false) {
+						if (!(grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare)  && grid[loc.getRow() + 1][loc.getCol()].getFlag() == false && currentChunk.isInSameChunk(s)) {
 							canFall = false;
 							break inner;
 						}
@@ -250,22 +261,19 @@ public class Main extends PApplet {
 	}
 
 	private void resetFlags() {
-//		for(int r = 0; r < grid.length; r++) {
-//			for(int c = 0; c < grid[r].length; c++) {
-//				if(grid[r][c].getFlag()) {
-//					Square s = grid[r][c];
-//					s.flag(false);
-//					if(isInside(s) && !(s instanceof EmptySquare)) {
-//						GridLoc loc = s.getLoc();
-//						grid[r][c] = new EmptySquare(loc);
-//						grid[loc.getRow()][loc.getCol()] = s;
-//					}
-//				} else {
-//					GridLoc loc = grid[r][c].getLoc();
-//					grid[r][c] = new EmptySquare(loc);
-//				}
-//			}
-//		}
+		for (int r = 0; r < grid.length; r++) {
+			for (int c = 0; c < grid[r].length; c++) {
+				if (grid[r][c].getFlag()) {
+					Square s = grid[r][c];
+					s.flag(false);
+					if (isInside(s) && !(s instanceof EmptySquare)) {
+						GridLoc loc = s.getLoc();
+						grid[r][c] = new EmptySquare(loc);
+						grid[loc.getRow()][loc.getCol()] = s;
+					}
+				}
+			}
+		}
 	}
 
 	private Chunk createChunk(GridLoc l) {
@@ -276,25 +284,20 @@ public class Main extends PApplet {
 	}
 
 	private void recursiveSquareAdd(GridLoc l, int index) {
-		System.out.println(l);
 		//base case
 		if (!isInside(l)) {
-			System.out.println("a");
 			return;
 		}
 		Square s = grid[l.getRow()][l.getCol()];
 		if(s instanceof EmptySquare) {
-			System.out.println("c");
 			return;
 		}
 		if(s.getFlag()) {
-			System.out.println("b");
 			return;
 		}
 		
 		s.flag(true);
 		chunkList.get(index).add(s);
-		System.out.println(s.getLoc());
 		recursiveSquareAdd(new GridLoc(l.getRow() + 1, l.getCol()), index);
 		recursiveSquareAdd(new GridLoc(l.getRow(), l.getCol() + 1), index);
 		recursiveSquareAdd(new GridLoc(l.getRow() - 1, l.getCol()), index);
@@ -489,7 +492,7 @@ public class Main extends PApplet {
 			int squaresHigh = Orientation.getHeight(type);
 			int squaresWide = Orientation.getWidth(type);
 			currentShape = new Shape(new GridLoc(4 - squaresHigh, grid[0].length / 2 - squaresWide), type);
-			System.out.println("Created a new shape");
+			System.out.println("Created a new shape at " + currentShape.getLoc());
 		}
 	}
 

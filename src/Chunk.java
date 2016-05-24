@@ -20,4 +20,11 @@ public class Chunk {
 			s.move(1);
 		}
 	}
+	
+	public boolean isInSameChunk(Square s) {
+		for(Square S : list) {
+			if(s.getLoc().getRow() == S.getLoc().getRow() && s.getLoc().getCol() == S.getLoc().getCol()) return true;
+		}
+		return false;
+	}
 }
