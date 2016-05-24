@@ -492,11 +492,31 @@ public class Main extends PApplet {
 	public void updateShape() {
 		if (currentShape == null) {
 			int type = (int) (Math.random() * 7);
-			int squaresHigh = Orientation.getHeight(type);
-			int squaresWide = Orientation.getWidth(type);
-			currentShape = new Shape(new GridLoc(4 - squaresHigh, grid[0].length / 2 - squaresWide), type);
-			System.out.println("Created a new shape at");
+			makeShape(type);
+			System.out.println("Created a new shape");
 		}
+	}
+	
+	public void makeShape(int type) {
+		int squaresHigh = Orientation.getHeight(type);
+		int squaresWide = Orientation.getWidth(type);
+		currentShape = new Shape(new GridLoc(4 - squaresHigh, grid[0].length / 2 - squaresWide), type);
+		while(shapeOverlaps()) {
+			currentShape.move(3);
+		}
+	}
+	
+	public boolean shapeOverlaps() {
+		for(Square s : currentShape.getBlocks()) {
+			if(currentShape.getLoc().getRow() < 0) {
+				song.stop();
+				gs = GameState.GAMEOVER;
+			}
+			GridLoc loc = s.getLoc();
+			Square sq = grid[loc.getRow()][loc.getCol()];
+			if(!(sq instanceof EmptySquare) && sq.isFalling() == false) return true;
+		}
+		return false;
 	}
 
 	public void paused() {
