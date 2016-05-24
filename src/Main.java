@@ -185,7 +185,7 @@ public class Main extends PApplet {
 		score += 100;
 		
 		//move floating blocks down (using chunk method)
-		moveFloatersDown();
+		moveFloatersDown(r);
 		
 		
 	}
@@ -196,14 +196,13 @@ public class Main extends PApplet {
 	 * all floating blocks will be grouped into 'chunks' of touching blocks
 	 * all 'chunks' will fall as individual shapes
 	 */
-	private void moveFloatersDown() {
+	private void moveFloatersDown(int row) {
 		chunkList = new ArrayList<Chunk>();
 		for (int r = 0; r < grid.length; r++) {
 			for (int c = 0; c < grid[0].length; c++) {
 				Square s = grid[r][c];
 				GridLoc l = new GridLoc(r, c);
-				if (!(s instanceof EmptySquare) && !s.getFlag())
-					createChunk(l);
+				if (!(s instanceof EmptySquare) && !s.getFlag()) createChunk(l);
 			}
 		}
 		// make the chunks fall
@@ -212,21 +211,24 @@ public class Main extends PApplet {
 		resetFlags();
 		chunkList.clear();
 	}
-	
+
 	private void letChunksFall() {
-		if(chunkList.size() > 0) for(Chunk currentChunk : chunkList) {
-			System.out.println(currentChunk.getSquareList().size());
-			boolean canFall = true;
-			while (canFall == true) {
-				for (Square s : currentChunk.getSquareList()) {
-					GridLoc loc = s.getLoc();
-					if (!isInside(new GridLoc(loc.getRow() + 1, loc.getCol()))) {
-						canFall = false;
-						break;
-					}
-					if (!(grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare) && grid[loc.getRow() + 1][loc.getCol()].getFlag() == false) {
-						canFall = false;
-						break;
+		if (chunkList.size() > 0)
+			for (Chunk currentChunk : chunkList) {
+				System.out.println(currentChunk.getSquareList().size());
+				boolean canFall = true;
+				while (canFall == true) {
+					inner: for (Square s : currentChunk.getSquareList()) {
+						GridLoc loc = s.getLoc();
+						if (!isInside(new GridLoc(loc.getRow() + 1, loc.getCol()))) {
+							canFall = false;
+							break inner;
+						}
+						//should be in the same chunk, not just flagged
+						if (!(grid[loc.getRow() + 1][loc.getCol()] instanceof EmptySquare)  && grid[loc.getRow() + 1][loc.getCol()].getFlag() == false) {
+							canFall = false;
+							break inner;
+						}
 					}
 					if (canFall) {
 						Chunk c = currentChunk;
@@ -245,20 +247,25 @@ public class Main extends PApplet {
 					}
 				}
 			}
-		}
 	}
 
 	private void resetFlags() {
-		for(int r = 0; r < grid.length; r++) {
-			for(int c = 0; c < grid[r].length; c++) {
-				if(grid[r][c].getFlag()) {
-					System.out.println(grid[r][c].getLoc().toString());
-					grid[r][c].flag(false);
-				} else {
-					grid[r][c] = new EmptySquare(new GridLoc(r, c));
-				}
-			}
-		}
+//		for(int r = 0; r < grid.length; r++) {
+//			for(int c = 0; c < grid[r].length; c++) {
+//				if(grid[r][c].getFlag()) {
+//					Square s = grid[r][c];
+//					s.flag(false);
+//					if(isInside(s) && !(s instanceof EmptySquare)) {
+//						GridLoc loc = s.getLoc();
+//						grid[r][c] = new EmptySquare(loc);
+//						grid[loc.getRow()][loc.getCol()] = s;
+//					}
+//				} else {
+//					GridLoc loc = grid[r][c].getLoc();
+//					grid[r][c] = new EmptySquare(loc);
+//				}
+//			}
+//		}
 	}
 
 	private Chunk createChunk(GridLoc l) {
