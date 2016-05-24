@@ -210,6 +210,7 @@ public class Main extends PApplet {
 		letChunksFall();
 		// loop thru all and set flags to false
 		resetFlags();
+		chunkList.clear();
 	}
 	
 	private void letChunksFall() {
@@ -242,7 +243,6 @@ public class Main extends PApplet {
 							}
 						}
 					}
-
 				}
 			}
 		}
@@ -251,7 +251,12 @@ public class Main extends PApplet {
 	private void resetFlags() {
 		for(int r = 0; r < grid.length; r++) {
 			for(int c = 0; c < grid[r].length; c++) {
-				grid[r][c].flag(false);
+				if(grid[r][c].getFlag()) {
+					System.out.println(grid[r][c].getLoc().toString());
+					grid[r][c].flag(false);
+				} else {
+					grid[r][c] = new EmptySquare(new GridLoc(r, c));
+				}
 			}
 		}
 	}
