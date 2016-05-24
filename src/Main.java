@@ -25,11 +25,11 @@ public class Main extends PApplet {
 	ArrayList<Chunk> chunkList;
 
 	static int WIDTH = 600;
-	static int HEIGHT = 1000;
+	static int HEIGHT = 800;
 	static int RIGHT_EDGE = WIDTH - 150;
 	static int LEFT_EDGE = 150;
 	static int TOP = 25;
-	static int BOTTOM = HEIGHT - 175;
+	static int BOTTOM = HEIGHT - 55;
 	static int INITIAL_HEIGHT = TOP - 4 * Square.SQUARE_HEIGHT;
 
 	public static void main(String[] args) {
@@ -123,7 +123,9 @@ public class Main extends PApplet {
 	}
 
 	public void mainMenu() {
-		text("Main Menu", 10, 30);
+		background(0, 255, 255);
+		textSize(50);
+		text("Main Menu", 150, TOP + 50);
 	}
 
 	public void load() {
@@ -141,8 +143,9 @@ public class Main extends PApplet {
 
 	public void playing() {
 		background(70, 170, 70);
-		text("Score: " + score, RIGHT_EDGE - 50, BOTTOM - 50);
-		rect(LEFT_EDGE, TOP, RIGHT_EDGE - LEFT_EDGE, BOTTOM - TOP - 80);
+		textSize(26);
+		text("Score: " + score, RIGHT_EDGE - 100, BOTTOM + 30);
+		rect(LEFT_EDGE, TOP, RIGHT_EDGE - LEFT_EDGE, BOTTOM - TOP);
 		frameCount++;
 		updateShape();
 		updateImages();
@@ -492,7 +495,7 @@ public class Main extends PApplet {
 			int squaresHigh = Orientation.getHeight(type);
 			int squaresWide = Orientation.getWidth(type);
 			currentShape = new Shape(new GridLoc(4 - squaresHigh, grid[0].length / 2 - squaresWide), type);
-			System.out.println("Created a new shape at " + currentShape.getLoc());
+			System.out.println("Created a new shape at");
 		}
 	}
 
@@ -505,6 +508,14 @@ public class Main extends PApplet {
 	}
 
 	public void gameOver() {
+		background(0, 0, 0);
+		textSize(40);
+		text("GAME OVER", WIDTH / 2 - 115, 100);
+		textSize(25);
+		text("You lose, loser!", WIDTH / 2 - 90, 150);
+		text("Final Score: " + score, WIDTH / 2 - 85, 250);
+		textSize(15);
+		text("Press space for main menu.", WIDTH / 2 - 90, HEIGHT - 150);
 		song.stop();
 	}
 
@@ -541,6 +552,9 @@ public class Main extends PApplet {
 			if (gs == GameState.MAINMENU) {
 				gs = GameState.LOAD;
 				System.out.println("Starting the game");
+			}
+			if (gs == GameState.GAMEOVER) {
+				gs = GameState.MAINMENU;
 			}
 		}
 		if (k == KeyAction.UP) {
